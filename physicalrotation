@@ -1,0 +1,110 @@
+#!/bin/bash
+#physicalrotation
+usage()
+{
+    echo 'Usage: physicalrotation "argument(s)" [-o dir] [-rm]'
+    echo ""
+    echo "Rotate physically the arguments (images). This was created to put images on the ENplaStik site. This require exiftran."
+    echo ""
+    echo "-o dir : pour placer les nouveaux fichiers dans le répertoire dir"
+    echo "-rm : pour effacer les fichiers en entrée"
+    echo ""
+    echo "-h or --help Print this message"
+}
+
+
+if [ $# = 0 ]
+then
+	usage
+fi
+
+let "a=0"
+let "erase=0"
+let "move=0"
+declare -a newfiles
+declare -a firstfiles
+
+
+while [ "$1" != "" ]; do
+    PARAM=`echo $1 | awk -F= '{print $1}'`
+    VALUE=`echo $1 | awk -F= '{print $2}'`
+    case $PARAM in
+        -h | --help)
+            usage
+            exit
+            ;;
+        -rm)
+            let "erase=1"
+	    ;;
+        -o)
+	    let "move=1"
+	    shift
+	    directory="$1"
+	    if [ ! -e "$directory" ]
+	    then
+		mkdir $directory
+	    fi
+            ;;
+	*)
+	    IFS='.' read -ra split <<< "$1" #in order to split $1 in an array with delimiter '.'
+	    if [ "${split[1]}" == "jpg" ] || [ "${split[1]}" == "JPG" ] || [ "${split[1]}" == "jpeg" ]
+	    then
+		if [ -e "$1" ]
+		then
+		    exiftran -a -p -o "${split[0]}-physically_rotated.jpg" "$1"
+		    echo -e "\e[92m$1 \e[39mphysically rotated"
+		    let "a=a+1"
+		    firstfiles+=("$1")
+		    newfiles+=("${split[0]}-physically_rotated.jpg")
+		else
+		    echo -e "\e[31m--- $1 \e[39mdoesn't seems to exist..."
+		fi
+	    else
+		echo -e "\e[91m--- $1 \e[39mnot a .jpg file, please use pngtojpg to convert it."
+	    fi
+            ;;
+    esac
+    shift
+done
+
+if [ $a -lt 2 ]
+then
+   echo -e "\e[39m$a files created."
+else
+   echo -e "\e[39m$a file created."
+fi
+
+#erase step :
+if [ $erase -eq 1 ]; then
+    
+    echo""
+    # for file in ${firstfiles[*]}
+    # do
+    # 	rm "$file"
+    # 	echo "$file erased"
+    # done
+    for ((i = 0; i < ${#firstfiles[@]}; i++))
+    do
+	rm "${firstfiles[$i]}"
+	echo "${firstfiles[$i]} removed"
+    done
+fi
+
+#move step :
+if [ $move -eq 1 ]; then
+    
+    echo""
+    #this doesn't work because of spaces in names
+    # for file in ${newfiles[*]}
+    # do
+    # 	mv "$file" "$directory"
+    # 	echo "$file moved"
+    # done
+    #instead use :
+    for ((i = 0; i < ${#newfiles[@]}; i++))
+    do
+	mv "${newfiles[$i]}" "$directory"
+	echo "${newfiles[$i]} moved"
+    done
+fi
+IFS=' '

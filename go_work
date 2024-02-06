@@ -1,0 +1,64 @@
+#!/bin/bash
+
+usage()
+{
+	echo "Usage: go_work [OPTION]..."
+	echo ""
+	echo "Run different useful command for the PhD work."
+	echo ""
+    echo "-c --cd          : move to Doctorat directory."
+    echo "-f --firefox     : run firefox."
+    echo "-p --pulsar			 : run pulsar."
+    echo "-t --thunderbird : run thunderbird."
+    echo "-a --all 				 : do every options above."
+    echo ""
+    echo "-h --help Print this message"
+}
+
+if [ $# = 0 ]
+then
+	usage
+fi
+liens=""
+
+while [ "$1" != "" ]; do
+    PARAM=`echo $1 | awk -F= '{print $1}'`
+    VALUE=`echo $1 | awk -F= '{print $2}'`
+    case $PARAM in
+        -h | --help)
+            usage
+            exit
+            ;;
+        -c | --cd)
+						echo -e "\033[1;33mGo directory!\033[0m"
+            cd ~/Documents/Doctorat
+						ls -l
+            ;;
+        -f | --firefox)
+						echo -e "\033[1;33mGo firefox!\033[0m"
+            firefox $liens &
+            ;;
+        -p | --pulsar)
+						echo -e "\033[1;33mGo pulsar!\033[0m"
+        		pulsar &
+            ;;
+        -t | --thunderbird)
+						echo -e "\033[1;33mGo thunderbird!\033[0m"
+        		thunderbird &
+            ;;
+        -a | --all)
+						echo -e "\033[1;33mGo work!\033[0m"
+            qwe RESEARCH
+            ls -l
+            firefox $liens &
+            pulsar &
+        		thunderbird &
+            ;;
+        *)
+            echo "ERROR: unknown parameter \"$PARAM\""
+            usage
+            exit 1
+            ;;
+    esac
+    shift
+done

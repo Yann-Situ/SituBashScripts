@@ -1,0 +1,22 @@
+#!/bin/bash
+#clipfile
+usage()
+{
+    echo 'Usage: clipfile file_name'
+    echo "Copy file intittled 'file_name' into the clipboard."
+}
+
+if [ $# = 0 ]
+then
+    usage
+    exit 0
+fi
+
+if [ -e "$1" ]
+then
+  cat $1 | xclip -sel clip
+  echo -e "\e[92m$1 \e[39mcopied into the clipboard."
+else
+  echo -e "\e[31m$1\e[39m is not an existing file..."
+  exit 1 # no such file or directory
+fi

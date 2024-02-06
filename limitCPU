@@ -1,0 +1,47 @@
+#!/bin/bash
+#limitCPU
+# $1 = name of process
+# $2 = percent limit
+
+usage()
+{
+    echo 'Usage: limitCPU process percent_limit [-h]'
+    echo ""
+    echo "Limits the CPU usage of process to the percent_limit."
+    echo ""
+    echo "-h or --help Print this message"
+}
+
+
+if [ $# = 0 ]
+then
+    usage
+    exit 1
+fi
+
+#init parameters
+w=$(echo "scale = 2; $2/100" | bc)
+s=$(echo "scale = 2; (100-$2)/100" | bc)
+export progname=$1
+
+# run if user hits control-c
+control_c()
+{
+  echo -en "\n*** Ouch! Exiting ***\n"
+  pkill $progname
+  exit 0
+}
+ 
+# trap keyboard interrupt (control-c)
+trap control_c SIGINT
+
+#main loop
+while true 
+do
+    echo "STOP proc with name: $1"    
+    pkill -SIGSTOP $1
+    sleep $s
+    echo "CONT proc with name: $1"
+    pkill -SIGCONT $1
+    sleep $w
+done

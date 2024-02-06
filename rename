@@ -1,0 +1,64 @@
+#!/bin/bash
+#rename
+usage()
+{
+    echo 'Usage: rename to_replace string_replacement files [-o dir]'
+    echo ""
+    echo "Rename files by replacing to_replace by string_replacement."
+    echo ""
+    echo "-o dir : copy and put renamefiles in dir"
+    echo ""
+    echo "-h or --help Print this message"
+}
+
+
+if [ $# -le 2 ]
+then
+	usage
+fi
+
+TOREP="$1"
+shift
+REPMT="$1"
+shift
+
+let "copy=0"
+declare -a files
+
+while [ "$1" != "" ]; do
+    PARAM=`echo $1 | awk -F= '{print $1}'`
+    VALUE=`echo $1 | awk -F= '{print $2}'`
+    case $PARAM in
+        -h | --help)
+            usage
+            exit
+            ;;
+        -o)
+	    let "copy=1"
+	    shift
+	    directory="$1"
+	    if [ ! -e "$directory" ]
+	    then
+		mkdir $directory
+	    fi
+            ;;
+	*)
+	    files+=("$1")
+            ;;
+    esac
+    shift
+done
+
+if [ $copy -eq 1 ]; then
+    for ((i = 0; i < ${#files[@]}; i++))
+    do
+	FSTR=$(echo "${files[$i]}" | sed "s/$TOREP/$REPMT/")
+	cp "${files[$i]}" "${directory}/$FSTR"
+    done
+else
+    for ((i = 0; i < ${#files[@]}; i++))
+    do
+	FSTR=$(echo "${files[$i]}" | sed "s/$TOREP/$REPMT/")
+	mv "${files[$i]}" "$FSTR"
+    done
+fi

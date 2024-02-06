@@ -1,0 +1,8 @@
+#!/bin/bash
+FILE="$MYBASHDIR/$1"
+if [ ! -f "$FILE" ]; then  # if doesn't exist
+    echo "command $1 doesn't exists in $MYBASHDIR directory..."
+else
+    rm $FILE
+    echo "$1 have been removed !"
+fi

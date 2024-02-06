@@ -1,0 +1,75 @@
+#!/bin/bash
+echo -e "\e[1mUBUNTU COMMANDS\033[m"
+echo "-----------------------"
+echo 'man               print the manual of the argument (eg `man man`).'
+echo "pwd               print the current directory."
+echo "baobab            for disk usage analyzer."
+echo "sudo              execute the command in super user mode."
+echo "apt-get           for package management (install, search, remove, autoremove, autoclean)."
+echo "dpkg -i file.deb  install a deb package."
+echo "!!                stands for the previous executed command."
+echo "     other useful commands: cd rm mkdir ls ll cp mv top."
+echo ""
+echo -e "\e[1mDOLLAR SYMBOL\033[m"
+echo "-----------------------"
+echo "\$1, \$2, \$3  the positional parameters."
+echo '"$@"           an array-like construct of all positional parameters, {$1, $2, $3 ...}.'
+echo '"$*"           the IFS expansion of all positional parameters, $1 $2 $3 ....'
+echo '$#             the number of positional parameters.'
+echo '$-             current options set for the shell.'
+echo '$$             pid of the current shell (not subshell).'
+echo '$_             most recent parameter (or the abs path of the command to start the current shell immediately after startup).'
+echo '$IFS           the (input) field separator.'
+echo '$?             the most recent foreground pipeline exit status.'
+echo '$!             the PID of the most recent background command.'
+echo '$0             the name of the shell or shell script.'
+echo ""
+echo -e "\e[1mREDIRECTION\033[m"
+echo "-----------------------"
+echo 'cmd>file       output of cmd in file.'
+echo 'cmd<file       file in input of cmd.'
+echo 'cmd>>file      output of cmd add at the end of file.'
+echo 'cmd<<STR       output of keyboard before STR in input of cmd.'
+echo 'cmd1|cmd2      output of cmd1 in input of cmd2.'
+echo ""
+echo -e "\e[1mCONDITION\033[m"
+echo "-----------------------"
+echo ' if [ condition ]; then'
+echo '      process...'
+echo ' fi'
+echo ' if [ ! cond1 ] && [ cond2 ] || [ cond3 ]'
+echo '-z $str      check if the string is empty.'
+echo '-n $str      check if the string is non empty.'
+echo '$n1 -eq $n2  equality btw numbers.'
+echo '$n1 -ne $n2  non equality btw numbers.'
+echo '-lt -gt      lower than, greater than.'
+echo '-le -ge      lower or equal, greater or equal.'
+echo '-e $file     check if file exists.'
+echo '-d $file     check if file is a directory.'
+echo '-x $file     check if file is executable.'
+echo ""
+echo -e "\e[1mCOLORS\033[m"
+echo '-----------------------
+red=`echo -e "\033[31m"`
+cyan=`echo -e "\033[36m"`
+yellow=`echo -e "\033[33m"`
+green=`echo -e "\033[32m"`
+blue=`echo -e "\033[34m"`
+purple=`echo -e "\033[35m"`
+normal=`echo -e "\033[m"`
+gras=`echo -e "\e[1m"`'
+echo ""
+echo -e "\e[1mUSEFUL COMMANDS\033[m"
+echo '-----------------------
+zip -r archive.zip directory
+tar -czvf archive.tar.gz directory-or-files
+        compress the directory (or files) into archive.tar.gz or archive.zip.
+tar -xzvf archive.tar.gz
+        extract archive.tar.gz.
+pdftk input.pdf cat 2 5-7 output output.pdf
+        extract pages 2 and within 5-7 of input.pdf to output.pdf.
+pdftk 1.pdf 2.pdf 3.pdf cat output output.pdf
+        concatenate the pdf files into output.pdf
+pdftk A=1.pdf B=2.pdf cat A1 B5-8 A6 output output.pdf
+        concatenate custom pages of the pdf files into output.pdf
+'

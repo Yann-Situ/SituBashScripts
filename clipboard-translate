@@ -1,0 +1,10 @@
+#!/bin/bash
+# created using chat-gptclipboa
+# Get the contents of the clipboard
+query=$(xclip -o)
+
+# Encode the query for use in a URL
+query_encoded=$(echo "$query" | sed 's/ /%20/g')
+
+# Open Firefox and perform a search
+firefox "https://translate.google.com/?hl=fr&sl=auto&tl=fr&text=$query_encoded&op=translate"

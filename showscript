@@ -1,0 +1,9 @@
+#!/bin/bash
+#find . -executable -type f | grep -v '~'
+cd $MYBASHDIR
+for file in `ls | grep -v '~' | grep -v '#'` #pour prendre seulement les fichier ne contenant pas ~ ou #
+do
+    if [ -x $file ]; then
+	echo "$file"
+    fi
+done

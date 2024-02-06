@@ -1,0 +1,14 @@
+#!/bin/bash
+echo 'MEMO LEX YACC COMPILATION
+-----------------------
+le projet doit au moins contenir les fichier :'
+echo -e "\e[1mfile.lex file.y \033[mcontenant les codes C des lexer+parser"
+echo -e "
+yacc -d file.y		crée les fichiers \e[1my.tab.h y.tab.c\033[m
+mv y.tab.h file.tab.h
+mv y.tab.c file.tab.c	pour renommer, où \e[1mfile.tab.h\033[m est included dans \e[1mfile.lex\033[m
+lex file.lex	       	crée le fichier \e[1mlex.yy.c\033[m
+mv lex.yy.c file.lex.c
+gcc -c file.lex.c -o file.lex.o
+gcc -c file.y.c -o file.y.o
+gcc -o file.exe file.lex.o file.y.o -ll -lm"

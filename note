@@ -1,0 +1,19 @@
+#!/bin/bash
+(notedir="$HOME/Documents/notes_diverses/"
+
+if [ -n "$1" ] # if there is an argument
+then
+    name=`echo $1 | sed 's/ /_/g'`
+else
+    name="note_$(ls "$notedir" | wc -l)"
+fi
+namefile="$notedir$name.md"
+if [ ! -e "$namefile" ]
+then
+    touch $namefile
+    echo "# $name" >> $namefile
+    echo "" >> $namefile
+    echo "" >> $namefile
+fi
+$EDITOR $namefile #+2
+) &

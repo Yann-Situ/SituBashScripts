@@ -1,0 +1,152 @@
+#!/bin/bash
+
+########################################################
+# cli_radio                                            #
+# based on IceFox radio-select script                  #
+# <http://www.linuxtrack.com/t1214-radioselect-sh.htm> #
+########################################################
+SCRIPT_NAME="$(basename $0)"
+
+# set colors
+RED='\e[41m'
+BLUE='\e[44m'
+CYAN='\e[46m'
+NC='\e[0m'
+
+# set player
+PLAYER_NAME="vlc" #or vlc
+PLAYER="/snap/bin/$PLAYER_NAME"
+
+if pidof -o %PPID -x "$SCRIPT_NAME" > /dev/null
+then
+    echo "WESH CA TOURNE DEJA"
+    pkill -KILL "$PLAYER_NAME"
+    pkill -KILL "$SCRIPT_NAME"
+    #kill -9 $(ps aux | grep '$SCRIPT_NAME' | awk '{ print $1 }' | head -n -1)
+    #exit 1
+fi
+
+# verify if $PLAYER is installed
+if [ -e $PLAYER ]; then
+    # stop current $PLAYER session
+    if [ "$(pidof $PLAYER_NAME)" ]; then
+        killall "$PLAYER_NAME"
+    fi
+    while true; do
+        #clear
+        echo ""
+        echo " ·····················································"
+        echo " ·             select a station and play             ·"
+        echo " ·                                                   ·"
+        echo -e " · $CYAN[space]$NC to pause, $CYAN[q]$NC to stop, $CYAN[Ctrl]+[c]$NC to quit ·"
+        echo " ·····················································"
+        echo ""
+        echo " ·····················································"
+        echo -e " ·  $BLUE  1 $NC  FIP                  $BLUE  2 $NC  FIP Jazz        ·"
+        echo -e " ·  $BLUE  3 $NC  FIP Hip Hop          $BLUE  4 $NC  FIP Groove      ·"
+        echo -e " ·  $BLUE  5 $NC  Best-Hits            $BLUE  6 $NC  Best-Dance      ·"
+        echo -e " ·  $BLUE  7 $NC  BFM                  $BLUE  8 $NC  Contact FM      ·"
+        echo -e " ·  $BLUE  9 $NC  FG DJ Radio          $BLUE 10 $NC  FG Underground  ·"
+        echo -e " ·  $BLUE 11 $NC  FG Vintage           $BLUE 12 $NC  Fréquence Jazz  ·"
+        echo -e " ·  $BLUE 13 $NC  Radio Sommières      $BLUE 14 $NC  RAJE            ·"
+        echo -e " ·  $BLUE 15 $NC  Radio Gerard         $BLUE 16 $NC  Radio Nova      ·"
+        echo -e " ·  $BLUE 17 $NC  Nova La Nuit         $BLUE 18 $NC  Radio Grenouille·"
+        echo -e " ·  $BLUE 19 $NC  France Culture       $BLUE 30 $NC  Gard-Lozère     ·"
+        echo -e " ·  $BLUE 20 $NC  Custom link...       "
+        echo " ·····················································"
+        echo ""
+
+	re='^[0-9]+$'
+	if [ $# = 1 ] && [[ $1 =~ $re ]]
+	then
+	    choix="$1"
+	    shift
+	else
+	    echo -e " select a $BLUE number $NC from 1 to 20 then hit $CYAN[Enter]$NC"
+            echo ""
+            read choix
+	fi
+
+        case $choix in
+            1)
+                $PLAYER http://direct.fipradio.fr/live/fip-midfi.mp3
+                ;;
+            2)
+                $PLAYER http://icecast.radiofrance.fr/fipjazz-hifi.aac
+                ;;
+            3)
+                $PLAYER http://icecast.radiofrance.fr/fiphiphop-midfi.mp3
+                ;;
+            4)
+                $PLAYER http://icecast.radiofrance.fr/fipgroove-midfi.mp3
+                ;;
+            5)
+                $PLAYER http://sv1.vestaradio.com:9500
+                ;;
+            6)
+                $PLAYER http://sv1.vestaradio.com:7420
+                ;;
+            7)
+                $PLAYER http://vipicecast.yacast.net/bfm
+                ;;
+            8)
+                $PLAYER http://broadcast.infomaniak.ch/radio-contact-high.mp3
+                ;;
+            9)
+                $PLAYER http://fg.impek.tv/listen.pls
+                ;;
+            10)
+                $PLAYER http://ufg.impek.tv/listen.pls
+                ;;
+            11)
+                $PLAYER http://fgv.impek.tv/listen.pls
+                ;;
+            12)
+                $PLAYER http://broadcast.infomaniak.ch/frequencejazz-high.mp3
+                ;;
+            13)
+                $PLAYER http://stream.radios-arra.fr:8000/sommieres
+                ;;
+            14)
+                $PLAYER https://raje.ice.infomaniak.ch/raje-128.mp3
+                ;;
+            15)
+                $PLAYER http://www.mistercouzin.net:8000/listen.pls
+                ;;
+            16)
+                $PLAYER http://radionova.ice.infomaniak.ch/radionova-high.mp3
+                ;;
+            17)
+                $PLAYER http://nova-ln.ice.infomaniak.ch/nova-ln-128.mp3
+                ;;
+            18)
+                $PLAYER http://live.radiogrenouille.com/live
+                ;;
+            19)
+                $PLAYER http://direct.franceculture.fr/live/franceculture-midfi.mp3
+                ;;
+            30)
+                $PLAYER http://direct.francebleu.fr/live/fbgardlozere-midfi.mp3
+                ;;
+            20)
+                echo ""
+                echo "put your custom link here"
+                echo ""
+                read customlink
+                $PLAYER $customlink
+                ;;
+            *)
+                echo -e "$RED wrong choice $NC"
+                echo "try again..."
+                echo ""
+                sleep 2
+                clear
+                ;;
+        esac
+    done
+else
+    echo " this script need vlc"
+    echo " install it or change the PLAYER"
+    echo "exiting ..."
+    exit 0
+fi

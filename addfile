@@ -1,0 +1,223 @@
+#!/bin/bash
+#addfile
+usage()
+{
+    echo 'Usage: addfile file_names [-c] [-cpp] [-makefile | -make | -Makefile]'
+    echo ""
+    echo "Create files 'file_name.h' and 'file_name.c' or 'file_name.cpp'."
+    echo ""
+    echo "-c   : add a .c file"
+    echo "-cpp : add a .cpp file"
+    echo "-makefile | -make | -Makefile : add a generic Makefile"
+    echo "-cmake : add a generic CMakeList file"
+    echo ""
+    echo "-h or --help Print this message"
+}
+
+
+if [ $# = 0 ]
+then
+    usage
+fi
+
+let "filecount=0"
+let "addh=0"
+let "addc=0"
+let "addcpp=0"
+let "addmake=0"
+let "addcmake=0"
+declare -a files
+
+
+while [ "$1" != "" ]; do
+    PARAM=`echo $1 | awk -F= '{print $1}'`
+    VALUE=`echo $1 | awk -F= '{print $2}'`
+    case $PARAM in
+        -h | --help)
+            usage
+            exit
+            ;;
+        -c)
+	    let "addc=1"
+	    let "addh=1"
+            ;;
+        -cpp)
+	    let "addcpp=1"
+	    let "addh=1"
+            ;;
+        -makefile | -make | -Makefile)
+	    let "addmake=1"
+            ;;
+        -cmake)
+	    let "addcmake=1"
+            ;;
+	*)
+	    #echo -e "\e[92m$1 \e[39mconverted into .jpg"
+	    let "filecount=filecount+1"
+	    files+=("$1")
+	    #echo -e "\e[31m--- $1 \e[39mdoesn't seems to exist..."
+	    #echo -e "\e[91m--- $1 \e[39mnot a .png file"
+            ;;
+    esac
+    shift
+done
+
+if [ $filecount -gt 0 ]
+then
+    #this doesn't work because of spaces in names
+    # for file in ${newfiles[*]}
+    # do
+    # 	mv "$file" "$directory"
+    # 	echo "$file moved"
+    # done
+    #instead use :
+    for ((i = 0; i < ${#files[@]}; i++))
+    do
+	# C FILE
+	if [ $addc -eq 1 ]; then
+	    if [ -e "${files[$i]}.c" ]
+	    then
+		echo -e "\e[31m---  ${files[$i]}.c \e[39malready exists..."
+	    else
+		touch "${files[$i]}.c"
+		echo "/* ${files[$i]}.c" >> "${files[$i]}.c"
+		cat <<EOT >> "${files[$i]}.c"
+ * Author : $USERNAME
+ * Description :
+ */
+EOT
+		echo "#include \"${files[$i]}.h\"" >> "${files[$i]}.c"
+		echo -e "\e[92m--- ${files[$i]}.c \e[39mcreated."
+	    fi
+	fi
+
+	# CPP FILE
+	if [ $addcpp -eq 1 ]; then
+	    if [ -e "${files[$i]}.cpp" ]
+	    then
+		echo -e "\e[31m---  ${files[$i]}.cpp \e[39malready exists..."
+	    else
+		touch "${files[$i]}.cpp"
+		echo "/* ${files[$i]}.cpp" >> "${files[$i]}.cpp"
+		cat <<EOT >> "${files[$i]}.cpp"
+ * Author : $USERNAME
+ * Description :
+ */
+EOT
+		echo "#include \"${files[$i]}.h\"" >> "${files[$i]}.cpp"
+		echo -e "\e[92m--- ${files[$i]}.cpp \e[39mcreated."
+	    fi
+	fi
+
+	# H FILE
+	if [ $addh -eq 1 ]; then
+	    if [ -e "${files[$i]}.h" ]
+	    then
+		echo -e "\e[31m---  ${files[$i]}.h \e[39malready exists..."
+	    else
+		touch "${files[$i]}.h"
+		echo "/* ${files[$i]}.h" >> "${files[$i]}.h"
+		echo " * Author : $USERNAME" >> "${files[$i]}.h"
+		echo " * Description :" >> "${files[$i]}.h"
+		echo " */" >> "${files[$i]}.h"
+		echo "#ifndef ${files[$i]^^}_H" >> "${files[$i]}.h"
+		echo "#define ${files[$i]^^}_H" >> "${files[$i]}.h"
+		echo "" >> "${files[$i]}.h"
+		echo "#endif" >> "${files[$i]}.h"
+		echo -e "\e[92m--- ${files[$i]}.h \e[39mcreated."
+	    fi
+	fi
+    done
+fi
+
+
+if [ $addmake -eq 1 ]
+then
+    if [ -e "Makefile" ]
+    then
+	echo -e "\e[31m--- Makefile \e[39malready exists..."
+    else
+	touch "Makefile"
+	cat <<'EOT' >> "Makefile"
+CFLAGS=-Wall -Wextra
+LDFLAGS=
+EXEC=exe
+CC=gcc
+CFILES=$(wildcard *.c)
+OFILES=$(patsubst %.c, obj/%.o, $(CFILES))
+
+
+all: obj dep $(EXEC)
+
+obj:
+	mkdir obj
+
+dep:
+	mkdir dep
+
+$(EXEC): $(OFILES)
+	$(CC) -o $@ $^ ${LDFLAGS}
+
+obj/%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $< -MMD -MF $(patsubst obj/%.o,dep/%.d,$@)
+
+.PHONY: clean mrproper
+
+clean:
+	$(RM) $(OFILES) $(patsubst obj/%.o,dep/%.d,$(OFILES))
+
+mrproper: clean
+	$(RM) $(EXEC)
+
+-include $(wildcard *.d)
+
+
+EOT
+	echo -e "\e[92m--- Makefile \e[39mcreated."
+    fi
+fi
+
+
+if [ $addcmake -eq 1 ]
+then
+    if [ -e "CMakeLists.txt" ]
+    then
+	echo -e "\e[31m--- CMakeLists.txt \e[39malready exists..."
+    else
+	touch "CMakeLists.txt"
+	cat <<'EOT' >> "CMakeLists.txt"
+cmake_minimum_required(VERSION 3.1)
+
+project(project)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# find_package(OpenCV REQUIRED)
+# find_package(Threads REQUIRED)
+
+set(CMAKE_CXX_STANDARD 11)
+
+file(GLOB INCLUDES include/*.h)
+
+file(GLOB SOURCES src/*.cpp)
+
+
+include_directories(
+# ${OpenCV_INCLUDE_DIRS}
+  include/
+)
+
+add_executable(
+  ${CMAKE_PROJECT_NAME}
+  ${SOURCES}
+)
+
+target_link_libraries(
+  ${CMAKE_PROJECT_NAME}
+#  ${OpenCV_LIBS}
+#  ${CMAKE_THREAD_LIBS_INIT}
+)
+EOT
+	echo -e "\e[92m--- CMakeLists.txt \e[39mcreated."
+    fi
+fi

@@ -1,0 +1,242 @@
+#!/bin/bash
+# Contact : coolaman@free.fr
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# Depends : 	Scrot
+#		Zenity
+#		Imagemagick 
+#		libaosd or Xdialog ( not necessary, only for showing time in pause )
+
+
+###################### Traduction ##########################
+
+lang=`echo ${LANG:0:2}`
+
+full="Total"
+desfull="Take a full screnshot"
+part="Partial"
+despart="Take a partial screenshot"
+title="Save in which directory ?"
+des="Description"
+ch="Choice"
+pause="Pause"
+despause="Allows to take a popup"
+pec="Unknown format"
+rap="Express"
+rapide="Recording under Screenshot.png in your home"
+ok="Save this screenshot ?"
+case $lang in
+fr)
+full="Totale"
+desfull="Prendre une capture totale"
+part="Partielle"
+despart="Prendre une capture partielle"
+title="Sauvegarder dans quelle repertoire ?"
+des="Description"
+ch="Choix"
+pause="Pause"
+despause="Permet de prendre un popup ou autre"
+pec="Format inconnu"
+rap="rapide"
+rapide="Enregistrement sous Screenshot.png dans votre home"
+ok="Garder ce screenshot ?"
+;;
+de)
+full="Voll"
+desfull="Eine Gesamtgefangennahme nehmen"
+part="Partiell"
+despart="Eine partielle Gefangennahme nehmen"
+title="Bewahren in, welches repertoire ?"
+des="Beschreibung"
+ch="Wahl"
+pause="Pause"
+despause="Erlaubt, ein popup zu nehmen "
+pec="Unbekanntes Format"
+rap="Schnellzug"
+rapide="Registrierung unter Screenshot.png in Ihrem Heim"
+ok="Diesen Screenshot behalten ?"
+;;
+es)
+full="Total"
+desfull="Tomar una captura total"
+part="Parcial"
+despart="Tomar una captura parcial"
+title="Salvaguardar en cuál repert ?"
+des="Descripción"
+ch="Elección"
+pause="Pausa"
+despause="Permite tomar un popup"
+pec="Formato desconocido"
+rap="rápido"
+rapide="Registro bajo Screenshot.png en su home"
+ok="Guardar a este screenshot ?"
+;;
+it)
+full="Totale"
+desfull="Prendere una cattura totale"
+part="Parziale"
+despart="Prendere una cattura parziale"
+title="Salvaguardare in quale repertoire  ?"
+des="Descrizione"
+ch="Scelta"
+pause="Pausa"
+despause="Permette di prendere un popup"
+pec="Formato sconosciuto"
+rap="Veloce"
+rapide="Registrazione sotto Screenshot.png nel vostro home"
+ok="Custodire questo screenshot ?"
+;;
+esac
+
+mkdir /home/$USER/scr 
+############################ Sauvegarde ####################################
+function name {
+	cd ~
+	files=`zenity  --file-selection --save --filename "Screenshot.png" --title "$title"` 
+
+	if [ "$files" = "" ]; then rm -rf /home/$USER/scr ; exit 0
+	fi
+######################## Recuperation du repertoire ##########################
+	rep=`dirname "$files"`
+	 
+######################### Recuperation du nom ###############################
+	nom=`basename "$files" | cut -f1 -d.`
+	
+##########################Recuperation extension ############################
+	ext=`basename "$files" | cut -f2 -d.`
+
+######################### Choix de l'extension ##############################
+
+	case $ext in
+	"png") 	ext="png"
+	;;
+	"jpg") 	ext="jpg"
+	;;
+	"ppm") 	ext="ppm"
+	;;
+	"tiff") ext="tiff"
+	;;
+	"jpeg") ext="jpeg"
+	;;
+	*) zenity --error --title="" --text="$pec"
+	name
+	;;
+	esac
+	
+convert /home/$USER/scr/Screenshot.png /home/$USER/scr/Screenshot."$ext"
+
+#################### Incrementation si le fichier existe ###################
+	
+	if [ -e "$rep"/"$nom"."$ext" ]; then v=1
+	while [ -e "$rep"/"$nom"_"$v"."$ext" ] 
+	do
+	echo $v
+	v=$(($v+1))
+	done
+	fi
+	
+if [ -n "$v" ] ; then mv /home/$USER/scr/Screenshot."$ext" "$rep"/"$nom"_"$v"."$ext"	
+else mv /home/$USER/scr/Screenshot."$ext" "$rep"/"$nom"."$ext"
+fi
+
+}
+
+############################# Affichage #####################################
+
+function affich {
+if [ -e /usr/bin/convert ] ; then
+convert -thumbnail 400x400 /home/$USER/scr/Screenshot.png /home/$USER/scr/thumb.png && ( display -border 2x2 -geometry -1-1 -title "Screenshot.png" -immutable /home/$USER/scr/thumb.png & zenity --question --title="Printscreen" --text="$ok" )
+	case $? in
+	1)
+	killall display ; zob="" 
+	rm /home/$USER/scr/*  ; choose
+	;;
+	0)
+	killall display 
+	;;
+	esac
+fi
+}
+
+############################ Affichage Pause ##############################
+
+function pa {
+if [ "$zob" = "ok" ] ; then
+	if [ -e /usr/bin/aosd_cat ]; then		
+	while [ "$p" -ge 1 ]
+	do
+	sleep 1
+	p=$(($p-1))
+	echo "$p" | aosd_cat  -p 2 --x-offset=-20 --y-offset=10 --font="bitstream bold 40" --fore-color="#e53838" --transparency=1 --fade-full=1000
+	done
+		
+	elif [ -e /usr/bin/Xdialog ]; then
+	(
+	while [ "$p" -ge 0 ]
+	do
+	echo "XXX";echo "$p";echo "XXX"
+	sleep 1
+	p=$(($p-1))
+	done
+	) | Xdialog  --under-mouse --no-buttons  --infobox "" 2 5 0
+	fi	
+fi
+
+}
+
+########################### Screenshot total ###############################
+function tot {
+
+	pa && scrot /home/$USER/scr/Screenshot.png -b -d1
+	if [ $? != 0 ] ; then zenity --error --title "Printscreen" ; p=0  
+	choose
+	fi
+}
+
+########################### Screenshot partiel ##############################
+
+function part {
+	pa && scrot /home/$USER/scr/Screenshot.png -s -b 
+	if [ $? != 0 ] ; then zenity --error --title "Printscreen" ; p=0 
+	choose
+	fi
+}
+
+################################# Choix #####################################
+
+function choose {
+
+choix=`zenity --list --radiolist --width=530 --height=220 --title="Printscreen" --column="" --column="$ch" --column="$des" \
+		TRUE	"$rap"		"$rapide" \
+		FALSE	"$full"		"$desfull" \
+		FALSE	"$part"		"$despart" \
+		FALSE	"$pause"		"$despause" `
+		
+case "$choix" in		
+"$full") tot && affich && name ;;
+"$part") part && affich && name ;;
+"$rap")  tot && affich ; DATE=`date +"%R_%d%m%Y"` ; cp /home/$USER/scr/Screenshot.png /home/$USER/Screenshot_$DATE.png ;;
+"$pause") p=`zenity --scale --min-value=0 --max-value=20 --text="$pause" --width=100 --title="Printscreen" ` ;	zob="ok" ; choose ;;
+*) rm -rf /home/$USER/scr ; exit 0 ;;
+esac
+
+}
+
+choose
+rm -rf /home/$USER/scr 
+exit 0
+
+

@@ -1,0 +1,9 @@
+#!/bin/bash
+# Get the contents of the clipboard
+query=$(xclip -o)
+
+# Encode the query for use in a URL
+query_encoded=$(echo "$query" | sed 's/ /%20/g')
+
+# Open Firefox and perform a search
+firefox "https://www.google.com/search?q=$query_encoded"

@@ -1,0 +1,99 @@
+#!/bin/bash
+#reducepdf
+
+#gs -q -dSAFER -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dPDFSETTINGS=/printer -sOUTPUTFILE=pres-printer.pdf -f ./ex-presentation.pdf
+usage()
+{
+    echo 'Usage: reducepdf ... [-o dir] [-rm]'
+    echo ""
+    echo "Reduces the size of pdf files."
+    echo ""
+    echo "-o dir : pour placer les nouveaux fichiers dans le répertoire dir"
+    echo "-rm : pour effacer les anciens pdf"
+    echo ""
+    echo "-h or --help Print this message"
+}
+
+
+if [ $# = 0 ]
+then
+	usage
+fi
+
+let "a=0"
+let "erase=0"
+let "move=0"
+declare -a newfiles
+declare -a firstfiles
+#-------------------------------------------------------------
+while [ "$1" != "" ]; do
+    PARAM=`echo $1 | awk -F= '{print $1}'`
+    VALUE=`echo $1 | awk -F= '{print $2}'`
+    case $PARAM in
+        -h | --help)
+            usage
+            exit
+            ;;
+        -rm)
+            let "erase=1"
+	    ;;
+        -o)
+	    let "move=1"
+	    shift
+	    directory="$1"
+            ;;
+	*)
+	    IFS='.' read -ra split <<< "$1" #in order to split $1 in an array with delimiter '.'
+	    if [ "${split[1]}" == "pdf" ]
+	    then
+		if [ -e "$1" ]
+		then
+		    new="${split[0]}-reduced.pdf"
+		    echo -e -n "\e[92m$1 \e[39mreduced from \033[1;33m$(stat -c %s "$1" | numfmt --to=si --suffix=o --format="%.3f")\033[0m to... "
+
+		    gs -q -dSAFER -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dCompatibilityLevel=1.5 -dPDFSETTINGS=/printer -sOUTPUTFILE="$new" -f "$1"
+            # gs -sDEVICE=pdfwrite  -dNOPAUSE -dQUIET -dBATCH -dPrinted=false -sOutputFile=internship-compressed.pdf internship-report.pdf
+		    echo -e "\033[1;33m$(stat -c %s "$new" | numfmt --to=si --suffix=o --format="%.3f")\033[0m"
+		    let "a=a+1"
+		    firstfiles+=("$1")
+		    newfiles+=("$new")
+		else
+		    echo -e "\e[31m--- $1 doesn't seems to exist..."
+		fi
+	    else
+		echo -e "\e[91m--- $1 not a .pdf file"
+	    fi
+            ;;
+    esac
+    shift
+done
+#-------------------------------------------------------------
+if [ $a -lt 2 ]
+then
+   echo -e "\e[39m$a files created."
+else
+   echo -e "\e[39m$a file created."
+fi
+
+#erase step :
+if [ $erase -eq 1 ]; then
+
+    echo""
+    for ((i = 0; i < ${#firstfiles[@]}; i++))
+    do
+	rm "${firstfiles[$i]}"
+	echo "${firstfiles[$i]} removed"
+    done
+fi
+
+#move step :
+if [ $move -eq 1 ]; then
+
+    echo""
+    for ((i = 0; i < ${#newfiles[@]}; i++))
+    do
+	mv "${newfiles[$i]}" "$directory"
+	echo "${newfiles[$i]} moved"
+    done
+fi
+IFS=' '

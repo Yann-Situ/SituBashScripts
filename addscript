@@ -1,0 +1,39 @@
+#!/bin/bash
+usage()
+{
+    echo 'Usage: addscript script_names [-h --help]'
+    echo ""
+    echo "Create or modify a script."
+    echo "-h or --help Print this message"
+}
+
+if [ $# = 0 ]
+then
+	usage
+fi
+
+while [ "$1" != "" ]; do
+    PARAM=`echo $1 | awk -F= '{print $1}'`
+    VALUE=`echo $1 | awk -F= '{print $2}'`
+    case $PARAM in
+        -h | --help)
+            usage
+            exit
+            ;;
+        *)
+	    scriptname="$1"
+        FILE="$MYBASHDIR/$scriptname"
+        if [ ! -f "$FILE" ]; then  # if doesn't exist
+    	touch $FILE
+    	echo "command $scriptname have been created"
+    	echo "#!/bin/bash" >> $FILE
+    	chmod +x $FILE
+    	$EDITOR $FILE &
+        else
+    	chmod +x $FILE
+    	($EDITOR $FILE ; echo "$scriptname have been modified !") &
+        fi
+            ;;
+    esac
+    shift
+done

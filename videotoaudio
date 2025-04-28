@@ -1,0 +1,10 @@
+#!/bin/bash
+for video in $*; do
+  if [ -f $video ] ; then
+    IFS='.' read -ra split <<< "$video" #in order to split $1 in an array with delimiter '.'  
+    ffmpeg -i "$video" -vn -acodec copy "${split[0]}-audio.mp4"
+    echo -e "\e[92m--- $video \e[39mconverted into .mp4"
+	else
+		echo -e "\e[91m--- $video \e[39mis not a valid file!"
+	fi
+done

@@ -1,0 +1,11 @@
+#!/bin/bash
+for video in $*; do
+  if [ -f $video ] ; then
+    IFS='.' read -ra split <<< "$video" #in order to split $1 in an array with delimiter '.'  
+    ffmpeg -threads 0 -i "$video" -s hd480 -vcodec libx264 -ab 128k -ar 44100 "${split[0]}-reduced.mp4"
+    echo -e -n "\e[92m$video \e[39mreduced from \033[1;33m$(stat -c %s "$1" | numfmt --to=si --suffix=o --format="%.3f")\033[0m to... "
+    echo -e "\033[1;33m$(stat -c %s "${split[0]}-reduced.mp4" | numfmt --to=si --suffix=o --format="%.3f")\033[0m"
+	else
+		echo -e "\e[91m--- $video \e[39mis not a valid file!"
+	fi
+done

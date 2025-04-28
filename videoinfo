@@ -1,0 +1,8 @@
+#!/bin/bash
+for video in $*; do
+  if [ -f $video ] ; then
+		ffmpeg -i "$video" 2>&1 | grep -E "Seems|Input|Duration:|Stream" ;
+	else
+		echo -e "\e[91m--- $video \e[39mis not a valid file!"
+	fi
+done

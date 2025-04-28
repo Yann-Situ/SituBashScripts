@@ -1,0 +1,3 @@
+#!/bin/bash
+# thrash, to move files to thrash instead of removing them
+mv -v "$@" ~/.local/share/Trash/files/

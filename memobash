@@ -72,4 +72,6 @@ pdftk 1.pdf 2.pdf 3.pdf cat output output.pdf
         concatenate the pdf files into output.pdf
 pdftk A=1.pdf B=2.pdf cat A1 B5-8 A6 output output.pdf
         concatenate custom pages of the pdf files into output.pdf
+ln -s src_dir link_path
+        create a symbolic link from src_dir to link_path
 '
